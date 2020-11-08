@@ -1,0 +1,32 @@
+service: product-service
+
+frameworkVersion: '2'
+
+provider:
+  profile: andery
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-1
+  stage: dev
+
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
+functions:
+  getProductsList:
+    handler: handlers/get-products/index.handler
+    events:
+      - http:
+          path: /products
+          method: get
+  getProductById:
+    handler: handlers/get-product-by-id/index.handler
+    events:
+      - http:
+          path: /products/{productId}
+          method: get
