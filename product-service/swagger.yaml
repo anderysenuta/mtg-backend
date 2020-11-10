@@ -30,6 +30,24 @@ paths:
                   $ref: '#/components/schemas/Product'
         '400':
           description: Invalid request
+    post:
+      tags:
+        - products
+      summary: Create a new product
+      requestBody:
+        $ref: '#/components/requestBodies/Product'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        '400':
+          description: Invalid request
   '/products/{productId}':
     get:
       tags:
@@ -67,3 +85,25 @@ components:
         name:
           type: string
           example: Abundance
+  requestBodies:
+    Product:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - title
+              - description
+              - price
+              - count
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              price:
+                type: integer
+              count:
+                type: integer
+      description: The product to create.
+      required: true

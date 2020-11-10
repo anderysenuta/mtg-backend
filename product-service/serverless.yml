@@ -8,6 +8,12 @@ provider:
   runtime: nodejs12.x
   region: eu-west-1
   stage: dev
+  environment:
+    PG_HOST: database-2.ca1yha57iyfz.eu-west-1.rds.amazonaws.com
+    PG_PORT: 5432
+    PG_DATABASE: postgres
+    PG_USERNAME: postgres
+    PG_PASSWORD: xxxxxxxx
 
 plugins:
   - serverless-webpack
@@ -30,3 +36,9 @@ functions:
       - http:
           path: /products/{productId}
           method: get
+  createProduct:
+    handler: handlers/create-product/index.handler
+    events:
+      - http:
+          path: /products
+          method: post
