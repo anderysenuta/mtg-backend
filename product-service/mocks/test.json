@@ -2,5 +2,5 @@
   "pathParameters":{
     "productId": "1c04420b-5d7c-4f28-87f7-b9ad4ffeb941"
   },
-  "body": "{\"title\":\"new product3\", \"description\":\"new product description3\", \"price\": 12, \"count\": 44}"
+  "body": "{\"title\":\"new product3\", \"description\":\"new product description3\", \"price\": 12, \"count\": true}"
 }

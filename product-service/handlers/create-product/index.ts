@@ -14,7 +14,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       typeof price !== "number" ||
       typeof count !== "number"
     ) {
-      throw { status: 400, message: 'Product data is invalid' };
+      throw { statusCode: 400, message: 'Product data is invalid' };
     }
 
     client = new Client(dbOptions);

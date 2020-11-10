@@ -22,7 +22,7 @@ export const handler: APIGatewayProxyHandler = async (event, _context) => {
 
     const { rows } = await client.query(query);
     if (!rows.length) {
-      throw { status: 404, message: `Product with id=${productId} not found` };
+      throw { statusCode: 404, message: `Product with id=${productId} not found` };
     }
 
     return {
