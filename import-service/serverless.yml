@@ -1,0 +1,51 @@
+service: import-service
+
+frameworkVersion: '2'
+
+provider:
+  profile: andery
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-1
+  stage: dev
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action: "s3:ListBuckets"
+      Resource:
+        - "arn:aws:s3:::mtg-application-import-bucket"
+    - Effect: "Allow"
+      Action: "s3:*"
+      Resource:
+        - "arn:aws:s3:::mtg-application-import-bucket/*"
+
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
+functions:
+  importProductsFile:
+    handler: handlers/import-product-file/index.handler
+    events:
+      - http:
+          path: /import
+          method: get
+          request:
+            parameters:
+              querystrings:
+                name: true
+
+  importFileParser:
+    handler: handlers/import-file-parser/index.handler
+    events:
+      - s3:
+          bucket: mtg-application-import-bucket
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+          existing: true
+
