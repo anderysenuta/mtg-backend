@@ -8,6 +8,24 @@ provider:
   runtime: nodejs12.x
   region: eu-west-1
   stage: dev
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action: "sqs:*"
+      Resource:
+        - Fn::GetAtt: [ CatalogItemsQueue, Arn ]
+    - Effect: "Allow"
+      Action: "sns:*"
+      Resource:
+        Ref: CatalogSNSTopic
+
+  environment:
+    PG_HOST: database-2.ca1yha57iyfz.eu-west-1.rds.amazonaws.com
+    PG_PORT: 5432
+    PG_DATABASE: postgres
+    PG_USERNAME: postgres
+    PG_PASSWORD: sqI1YkVdyfX0MqUOfkWX
+    SNS_ARN:
+      Ref: CatalogSNSTopic
 
 plugins:
   - serverless-webpack
@@ -36,3 +54,30 @@ functions:
       - http:
           path: /products
           method: post
+  catalogBatchProcess:
+    handler: handlers/catalog-batch-process/index.handler
+    events:
+      - sqs:
+          batchSize: 5
+          arn:
+            Fn::GetAtt:
+              - CatalogItemsQueue
+              - Arn
+
+resources:
+  Resources:
+    CatalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: catalog-item-queue
+    CatalogSNSTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: catalog-sns-topic
+    CatalogSNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: anderyaws@gmail.com
+        Protocol: email
+        TopicArn:
+          Ref: CatalogSNSTopic

@@ -18,6 +18,13 @@ provider:
       Action: "s3:*"
       Resource:
         - "arn:aws:s3:::mtg-application-import-bucket/*"
+    - Effect: "Allow"
+      Action: "sqs:*"
+      Resource:
+        - "arn:aws:sqs:eu-west-1:373270479572:catalog-item-queue"
+
+  environment:
+    SQS_URL: "https://sqs.eu-west-1.amazonaws.com/373270479572/catalog-item-queue"
 
 plugins:
   - serverless-webpack
