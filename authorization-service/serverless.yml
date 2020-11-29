@@ -1,0 +1,30 @@
+service: authorization-service
+
+frameworkVersion: '2'
+
+provider:
+  profile: andery
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-1
+  stage: dev
+
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
+functions:
+  basicAuthorizer:
+    handler: handlers/basic-authorizer/index.handler
+    events:
+      - http:
+          path: /import
+          method: get
+          request:
+            parameters:
+              querystrings:
+                name: true
