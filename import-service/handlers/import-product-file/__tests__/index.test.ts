@@ -13,7 +13,7 @@ describe("Import Products File", () => {
     };
 
     AWSMock.mock('S3', 'getSignedUrl', (_, _params, callback) => {
-      callback(null, MOCK_URL)
+      callback(null, MOCK_URL + '/' + event.queryStringParameters.name)
     })
 
     const res = await handler((event as unknown) as APIGatewayProxyEvent, {} as Context, jest.fn());

@@ -1,4 +1,5 @@
 import S3 from 'aws-sdk/clients/s3';
+import SQS from 'aws-sdk/clients/sqs';
 import { S3Handler } from 'aws-lambda';
 import csv from 'csv-parser';
 
@@ -8,6 +9,8 @@ export const handler: S3Handler = (event, _context) => {
   console.log('Import product parser: ', event);
   try {
     const s3 = new S3();
+    const sqs = new SQS();
+    const { SQS_URL } = process.env;
 
     event.Records.forEach((record) => {
       const s3Stream = s3.getObject({
@@ -15,8 +18,15 @@ export const handler: S3Handler = (event, _context) => {
         Key: record.s3.object.key
       }).createReadStream();
 
-      s3Stream.pipe(csv())
-        .on('data', (data) => console.log(data))
+      s3Stream.pipe(csv(['title', 'description', 'price']))
+        .on('data', (data) => {
+          sqs.sendMessage({
+            QueueUrl: SQS_URL,
+            MessageBody: JSON.stringify(data)
+          }, (err)=> {
+          if (err) throw err;
+          })
+        })
         .on('end', async () => {
           console.log('Copy from ' + BUCKET_NAME + '/' + record.s3.object.key);
 
