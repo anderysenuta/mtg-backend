@@ -41,10 +41,23 @@ functions:
       - http:
           path: /import
           method: get
+          cors: true
           request:
             parameters:
               querystrings:
                 name: true
+          authorizer:
+            name: tokenAuthorizer
+            arn:
+              Fn::Join:
+                - ':'
+                - - 'arn:aws:lambda'
+                  - Ref: 'AWS::Region'
+                  - Ref: 'AWS::AccountId'
+                  - 'function:authorization-service-dev-basicAuthorizer'
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.Authorization
+            type: token
 
   importFileParser:
     handler: handlers/import-file-parser/index.handler
@@ -56,3 +69,21 @@ functions:
             - prefix: uploaded/
           existing: true
 
+resources:
+  Resources:
+    GatewayResponseDenied:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: ACCESS_DENIED
+        RestApiId: !Ref ApiGatewayRestApi
+    GatewayResponseUnauthorized:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: UNAUTHORIZED
+        RestApiId: !Ref ApiGatewayRestApi
