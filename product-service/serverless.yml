@@ -42,18 +42,21 @@ functions:
       - http:
           path: /products
           method: get
+          cors: true
   getProductById:
     handler: handlers/get-product-by-id/index.handler
     events:
       - http:
           path: /products/{productId}
           method: get
+          cors: true
   createProduct:
     handler: handlers/create-product/index.handler
     events:
       - http:
           path: /products
           method: post
+          cors: true
   catalogBatchProcess:
     handler: handlers/catalog-batch-process/index.handler
     events:
