@@ -19,9 +19,6 @@ app.all('/*', (req, res) => {
   const recipient = req.originalUrl.split('/')[1];
   const recipientUrl = process.env[recipient]
 
-  console.log('===');
-  console.log(recipientUrl);
-
   if (recipientUrl) {
     const axiosConfig = {
       method: req.method,
