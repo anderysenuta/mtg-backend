@@ -11,13 +11,31 @@ const app = express();
 app.use(express.json());
 
 
-app.all('/*', (req, res) => {
-  console.log(req.originalUrl);
-  console.log(req.method);
-  console.log(req.body);
+const CACHED_REQUEST = '/products';
+const CACHED_METHOD = 'GET';
+const cache = new Map();
 
+app.use('/products', (req, res, next) => {
+  const cachedRequest = cache.get(CACHED_REQUEST);
+
+  if (req.method !== CACHED_METHOD || !cachedRequest) {
+    next();
+    return;
+  }
+
+  const { expired, data } = cachedRequest;
+
+  if (expired > new Date()) {
+    res.json(data);
+  } else {
+    next();
+  }
+});
+
+
+app.all('/*', (req, res) => {
   const recipient = req.originalUrl.split('/')[1];
-  const recipientUrl = process.env[recipient]
+  const recipientUrl = process.env[recipient];
 
   if (recipientUrl) {
     const axiosConfig = {
@@ -29,6 +47,14 @@ app.all('/*', (req, res) => {
     axios(axiosConfig)
       .then(response => {
         console.log('response data from recipients', response.data);
+
+        if (req.originalUrl === CACHED_REQUEST && req.method === CACHED_METHOD) {
+          cache.set(CACHED_REQUEST, {
+            expired: new Date().setMinutes(new Date().getMinutes() + 2),
+            data: response.data
+          });
+        }
+
         res.json(response.data);
       })
       .catch(err => {
