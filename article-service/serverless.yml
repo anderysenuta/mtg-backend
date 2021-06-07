@@ -1,0 +1,53 @@
+service: article-service
+
+frameworkVersion: '2'
+
+provider:
+  profile: andery
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+  stage: dev
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action: "sqs:*"
+      Resource:
+        - Fn::GetAtt: [ ArticleItemsQueue, Arn ]
+  environment:
+    SQS_URL: !Ref ArticleItemsQueue
+
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
+functions:
+  shareArticle:
+    handler: handlers/article-create/index.handler
+    events:
+      - http:
+          path: /
+          method: post
+  articleBatchProcess:
+    handler: handlers/article-batch-process/index.handler
+    timeout: 900
+    events:
+      - sqs:
+          batchSize: 1
+          arn:
+            Fn::GetAtt:
+              - ArticleItemsQueue
+              - Arn
+
+resources:
+  Resources:
+    ArticleItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: article-item-queue.fifo
+        FifoQueue: true
+        ContentBasedDeduplication: true
+        VisibilityTimeout: 900
